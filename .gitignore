@@ -1,0 +1,168 @@
+# Bioinformatics-specific patterns
+
+# Data files
+*.fasta
+*.fa
+*.fastq
+*.fq
+*.sam
+*.bam
+*.bai
+*.bed
+*.wig
+*.bigwig
+*.vcf
+*.gff
+*.gtf
+*.gff3
+*.bcf
+*.cram
+*.crai
+*.tbi
+*.csi
+
+# Reference genomes and databases
+reference/
+genomes/
+databases/
+indices/
+*.idx
+*.fai
+*.dict
+
+# Large result files
+*.h5
+*.hdf5
+*.h5ad
+*.h5seurat
+*.rds
+*.RData
+*.Rdata
+
+# Temporary and cache files
+tmp/
+temp/
+cache/
+work/
+.nextflow/
+.nextflow.log*
+.snakemake/
+__pycache__/
+*.pyc
+*.pyo
+
+# R specific
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+renv/library/
+renv/staging/
+renv/local/
+packrat/lib*/
+packrat/src/
+
+# Conda environments
+envs/conda/*/
+!envs/conda/*.yml
+!envs/conda/*.yaml
+
+# Container images
+*.sif
+*.img
+*.simg
+
+# Logs and reports
+logs/
+*.log
+*.out
+*.err
+reports/
+trace/
+timeline/
+dag/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data directories (keep structure, ignore contents)
+data/raw/*
+data/processed/*
+data/external/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+
+# Results (keep structure, ignore contents)
+results/*
+!results/.gitkeep
+!results/README.md
+
+# Scratch space
+scratch/
+
+# Large downloads
+downloads/
+
+# Archive files and large binaries
+*.zip
+*.tar.gz
+*.tar.bz2
+*.7z
+*.rar
+*.rpm
+*.deb
+*.dmg
+*.iso
+*.jar
+*.exe
+*.msi
+*.bin
+*.img
+*.flatpakref
+
+# Large image files
+*.jpg
+*.jpeg
+*.png
+*.tiff
+*.tif
+*.bmp
+*.psd
+
+# Document files
+*.pdf
+*.docx
+*.pptx
+*.xlsx
+
+# Large data files
+*.csv
+*.tsv
+*.gz
+*.mtx
+SRR*
+
+# Secrets and configs with sensitive data
+*.key
+*.pem
+config/secrets/
+.env
+.secrets
+

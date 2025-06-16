@@ -1,0 +1,206 @@
+# Snakemake workflow for bioinformatics analysis
+# Author: bioinfo-project
+# Date: 2024
+
+# Configuration
+configfile: "../../config/project.yml"
+
+# Import Python libraries
+import pandas as pd
+import os
+from pathlib import Path
+
+# Set working directory
+workdir: Path(config.get("proj_root", "."))
+
+# Load samples
+samples_df = pd.read_csv(config["samples"], sep="\t")
+SAMPLES = samples_df["sample_id"].tolist()
+
+# Define output directories
+RESULTS = Path(config.get("results_dir", "results"))
+LOGS = Path(config.get("logs_dir", "logs"))
+
+# Rule all - define final outputs
+rule all:
+    input:
+        # Quality control
+        expand(RESULTS / "qc" / "fastqc" / "{sample}_R1_fastqc.html", sample=SAMPLES),
+        expand(RESULTS / "qc" / "fastqc" / "{sample}_R2_fastqc.html", sample=SAMPLES),
+        
+        # MultiQC report
+        RESULTS / "qc" / "multiqc" / "multiqc_report.html",
+        
+        # Trimmed reads
+        expand(RESULTS / "trimmed" / "{sample}_R1_trimmed.fastq.gz", sample=SAMPLES),
+        expand(RESULTS / "trimmed" / "{sample}_R2_trimmed.fastq.gz", sample=SAMPLES),
+        
+        # Alignment
+        expand(RESULTS / "alignment" / "{sample}.bam", sample=SAMPLES),
+        
+        # Quantification (example for RNA-seq)
+        expand(RESULTS / "quantification" / "{sample}" / "quant.sf", sample=SAMPLES),
+        
+        # Summary statistics
+        RESULTS / "summary" / "analysis_summary.txt"
+
+# Rule: FastQC quality control
+rule fastqc:
+    input:
+        r1 = lambda w: samples_df[samples_df.sample_id == w.sample].r1_path.iloc[0],
+        r2 = lambda w: samples_df[samples_df.sample_id == w.sample].r2_path.iloc[0]
+    output:
+        html_r1 = RESULTS / "qc" / "fastqc" / "{sample}_R1_fastqc.html",
+        zip_r1 = RESULTS / "qc" / "fastqc" / "{sample}_R1_fastqc.zip",
+        html_r2 = RESULTS / "qc" / "fastqc" / "{sample}_R2_fastqc.html",
+        zip_r2 = RESULTS / "qc" / "fastqc" / "{sample}_R2_fastqc.zip"
+    params:
+        outdir = RESULTS / "qc" / "fastqc"
+    threads: 2
+    conda:
+        "../../envs/conda/rnaseq.yml"
+    shell:
+        """
+        fastqc -t {threads} -o {params.outdir} {input.r1} {input.r2}
+        """
+
+# Rule: Read trimming with Trimmomatic
+rule trimmomatic:
+    input:
+        r1 = lambda w: samples_df[samples_df.sample_id == w.sample].r1_path.iloc[0],
+        r2 = lambda w: samples_df[samples_df.sample_id == w.sample].r2_path.iloc[0]
+    output:
+        r1 = RESULTS / "trimmed" / "{sample}_R1_trimmed.fastq.gz",
+        r2 = RESULTS / "trimmed" / "{sample}_R2_trimmed.fastq.gz",
+        r1_unpaired = temp(RESULTS / "trimmed" / "{sample}_R1_unpaired.fastq.gz"),
+        r2_unpaired = temp(RESULTS / "trimmed" / "{sample}_R2_unpaired.fastq.gz")
+    params:
+        # Trimmomatic parameters
+        adapters = config.get("adapters", ""),
+        extra = config.get("trimmomatic_params", "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36")
+    threads: 4
+    conda:
+        "../../envs/conda/rnaseq.yml"
+    shell:
+        """
+        trimmomatic PE -threads {threads} \
+            {input.r1} {input.r2} \
+            {output.r1} {output.r1_unpaired} \
+            {output.r2} {output.r2_unpaired} \
+            {params.extra}
+        """
+
+# Rule: Alignment with STAR (example for RNA-seq)
+rule star_align:
+    input:
+        r1 = RESULTS / "trimmed" / "{sample}_R1_trimmed.fastq.gz",
+        r2 = RESULTS / "trimmed" / "{sample}_R2_trimmed.fastq.gz",
+        index = config["star_index"]
+    output:
+        bam = RESULTS / "alignment" / "{sample}.bam",
+        log = RESULTS / "alignment" / "{sample}_Log.final.out"
+    params:
+        prefix = RESULTS / "alignment" / "{sample}_",
+        extra = config.get("star_params", "--outSAMtype BAM SortedByCoordinate")
+    threads: 8
+    conda:
+        "../../envs/conda/rnaseq.yml"
+    shell:
+        """
+        STAR --genomeDir {input.index} \
+             --readFilesIn {input.r1} {input.r2} \
+             --readFilesCommand zcat \
+             --runThreadN {threads} \
+             --outFileNamePrefix {params.prefix} \
+             {params.extra}
+        
+        mv {params.prefix}Aligned.sortedByCoord.out.bam {output.bam}
+        """
+
+# Rule: Quantification with Salmon
+rule salmon_quant:
+    input:
+        r1 = RESULTS / "trimmed" / "{sample}_R1_trimmed.fastq.gz",
+        r2 = RESULTS / "trimmed" / "{sample}_R2_trimmed.fastq.gz",
+        index = config["salmon_index"]
+    output:
+        quant = RESULTS / "quantification" / "{sample}" / "quant.sf"
+    params:
+        outdir = RESULTS / "quantification" / "{sample}",
+        extra = config.get("salmon_params", "--validateMappings")
+    threads: 4
+    conda:
+        "../../envs/conda/rnaseq.yml"
+    shell:
+        """
+        salmon quant -i {input.index} \
+                     -l A \
+                     -1 {input.r1} \
+                     -2 {input.r2} \
+                     -p {threads} \
+                     -o {params.outdir} \
+                     {params.extra}
+        """
+
+# Rule: MultiQC report
+rule multiqc:
+    input:
+        fastqc = expand(RESULTS / "qc" / "fastqc" / "{sample}_R{read}_fastqc.zip", 
+                       sample=SAMPLES, read=[1, 2]),
+        star_logs = expand(RESULTS / "alignment" / "{sample}_Log.final.out", sample=SAMPLES)
+    output:
+        report = RESULTS / "qc" / "multiqc" / "multiqc_report.html"
+    params:
+        indir = RESULTS,
+        outdir = RESULTS / "qc" / "multiqc"
+    conda:
+        "../../envs/conda/rnaseq.yml"
+    shell:
+        """
+        multiqc {params.indir} -o {params.outdir}
+        """
+
+# Rule: Generate summary
+rule summary:
+    input:
+        quant_files = expand(RESULTS / "quantification" / "{sample}" / "quant.sf", sample=SAMPLES),
+        multiqc = RESULTS / "qc" / "multiqc" / "multiqc_report.html"
+    output:
+        summary = RESULTS / "summary" / "analysis_summary.txt"
+    run:
+        summary_lines = [
+            "=== Bioinformatics Analysis Summary ===",
+            f"Date: {pd.Timestamp.now()}",
+            f"Samples processed: {len(SAMPLES)}",
+            f"Samples: {', '.join(SAMPLES)}",
+            "",
+            "Pipeline steps completed:",
+            "- Quality control with FastQC",
+            "- Read trimming with Trimmomatic",
+            "- Alignment with STAR",
+            "- Quantification with Salmon",
+            "- Summary report with MultiQC",
+            "",
+            f"Results directory: {RESULTS}",
+            f"MultiQC report: {input.multiqc}"
+        ]
+        
+        with open(output.summary, 'w') as f:
+            f.write("\n".join(summary_lines))
+
+# Additional rules can be added here for:
+# - Differential expression analysis
+# - Variant calling
+# - Genome assembly
+# - etc.
+
+# Rule: Clean temporary files
+rule clean:
+    shell:
+        """
+        echo "Cleaning temporary files..."
+        find {RESULTS} -name "*.tmp" -delete
+        find {RESULTS} -name "*_unpaired.fastq.gz" -delete
+        echo "Cleanup completed."
+        """
+

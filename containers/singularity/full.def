@@ -1,0 +1,86 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%labels
+    Author bioinfo-project
+    Description Comprehensive bioinformatics analysis container
+    Version 1.0
+
+%help
+    This container provides a comprehensive bioinformatics toolkit including:
+    - Quality control tools (FastQC, MultiQC, Trimmomatic)
+    - Alignment tools (BWA, STAR, HISAT2, Bowtie2)
+    - Variant calling (GATK, FreeBayes)
+    - Quantification (Salmon, Kallisto)
+    - Python data science stack (pandas, numpy, scanpy)
+    - R statistical environment with Bioconductor
+    
+    Usage:
+        singularity exec bioinfo.sif <command>
+        singularity shell bioinfo.sif
+
+%environment
+    export PATH=/opt/conda/bin:${PATH}
+    export LANG=C.UTF-8
+    export LC_ALL=C.UTF-8
+
+%post
+    # Update system
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update && apt-get install -y \
+        wget curl git build-essential cmake \
+        autoconf automake libtool pkg-config \
+        zlib1g-dev libbz2-dev liblzma-dev \
+        libcurl4-openssl-dev libssl-dev \
+        libncurses5-dev libhdf5-dev libxml2-dev \
+        libfontconfig1-dev libharfbuzz-dev \
+        libfribidi-dev libfreetype6-dev \
+        libpng-dev libtiff5-dev libjpeg-dev \
+        default-jdk \
+    && rm -rf /var/lib/apt/lists/*
+    
+    # Install Miniconda
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+    /bin/bash /tmp/miniconda.sh -b -p /opt/conda
+    rm /tmp/miniconda.sh
+    /opt/conda/bin/conda clean -tipsy
+    
+    # Configure conda
+    /opt/conda/bin/conda config --add channels bioconda
+    /opt/conda/bin/conda config --add channels conda-forge
+    /opt/conda/bin/conda config --set channel_priority strict
+    
+    # Install bioinformatics tools
+    /opt/conda/bin/conda install -y \
+        fastqc=0.12.1 multiqc=1.15 trimmomatic=0.39 \
+        bwa=0.7.17 star=2.7.10b hisat2=2.2.1 \
+        samtools=1.17 bcftools=1.17 htslib=1.17 \
+        salmon=1.10.1 kallisto=0.48.0 \
+        gatk4=4.4.0.0 freebayes=1.3.6 \
+        bedtools=2.31.0 vcftools=0.1.16 \
+        python=3.11 r-base=4.3.1
+    
+    # Install Python packages
+    /opt/conda/bin/pip install --no-cache-dir \
+        numpy pandas scipy matplotlib seaborn \
+        jupyterlab scanpy scvi-tools biopython pysam
+    
+    # Install R packages
+    /opt/conda/bin/R -e "install.packages('BiocManager')"
+    /opt/conda/bin/R -e "BiocManager::install(c('DESeq2', 'edgeR', 'limma'))"
+    /opt/conda/bin/R -e "install.packages(c('tidyverse', 'Seurat', 'pheatmap'))"
+    
+    # Clean up
+    /opt/conda/bin/conda clean -afy
+    apt-get clean
+    
+    # Create directories
+    mkdir -p /workspace /data /results
+
+%runscript
+    exec /bin/bash "$@"
+
+%startscript
+    echo "Starting bioinformatics container..."
+    exec /bin/bash
+

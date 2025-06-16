@@ -1,0 +1,231 @@
+# Project Configuration
+# Main configuration file for bioinformatics analysis project
+
+# Project metadata
+project:
+  name: "Bioinformatics Analysis Project"
+  version: "1.0.0"
+  description: "Comprehensive bioinformatics analysis pipeline"
+  author: "bioinfo-project"
+  email: "contact@bioinfo-project.org"
+  license: "MIT"
+  created: "2024-01-01"
+  updated: "2024-12-16"
+
+# Directory structure
+directories:
+  proj_root: "."
+  data_dir: "data"
+  results_dir: "results"
+  logs_dir: "logs"
+  tmp_dir: "tmp"
+  cache_dir: "cache"
+  envs_dir: "envs"
+  containers_dir: "containers"
+  workflows_dir: "workflows"
+  bin_dir: "bin"
+  docs_dir: "docs"
+  tests_dir: "tests"
+  config_dir: "config"
+
+# Data organization
+data:
+  raw: "data/raw"
+  processed: "data/processed"
+  external: "data/external"
+  reference: "data/reference"
+  interim: "data/interim"
+  
+  # File patterns
+  fastq_pattern: "*.fastq.gz"
+  fasta_pattern: "*.fasta"
+  
+  # Sample sheet
+  samples: "data/samples.tsv"
+  
+# Reference data
+reference:
+  # Genome files
+  genome_fasta: "data/reference/genome.fasta"
+  genome_gtf: "data/reference/annotation.gtf"
+  genome_gff: "data/reference/annotation.gff3"
+  
+  # Indices
+  star_index: "data/reference/indices/star"
+  salmon_index: "data/reference/indices/salmon"
+  bwa_index: "data/reference/indices/bwa"
+  bowtie2_index: "data/reference/indices/bowtie2"
+  
+  # Databases
+  blast_db: "data/reference/blast"
+  kraken_db: "data/reference/kraken"
+  
+# Analysis parameters
+analysis:
+  # Workflow selection
+  workflow: "rnaseq"  # Options: rnaseq, chipseq, wgs, amplicon, etc.
+  
+  # Analysis type
+  analysis_type: "differential_expression"
+  
+  # Sample information
+  paired_end: true
+  strand_specific: false
+  
+  # Quality control
+  skip_qc: false
+  min_quality: 20
+  min_length: 50
+  
+  # Trimming
+  skip_trimming: false
+  adapter_removal: true
+  
+  # Alignment
+  skip_alignment: false
+  aligner: "star"  # Options: star, hisat2, bwa, bowtie2
+  
+  # Quantification
+  quantification_method: "salmon"  # Options: salmon, kallisto, featurecounts
+  
+# Tool-specific parameters
+tools:
+  # FastQC
+  fastqc:
+    threads: 2
+    
+  # Trimmomatic
+  trimmomatic:
+    threads: 4
+    params: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"
+    adapters: "data/reference/adapters.fasta"
+    
+  # STAR
+  star:
+    threads: 8
+    params: "--outSAMtype BAM SortedByCoordinate --quantMode GeneCounts"
+    
+  # Salmon
+  salmon:
+    threads: 4
+    params: "--validateMappings --gcBias"
+    
+  # GATK
+  gatk:
+    java_opts: "-Xmx8g"
+    
+  # MultiQC
+  multiqc:
+    config: "config/multiqc_config.yaml"
+    
+# Computational resources
+resources:
+  # Default resources
+  default:
+    cpus: 1
+    memory: "4G"
+    time: "2h"
+    
+  # Process-specific resources
+  fastqc:
+    cpus: 2
+    memory: "2G"
+    time: "1h"
+    
+  trimmomatic:
+    cpus: 4
+    memory: "8G"
+    time: "4h"
+    
+  star_align:
+    cpus: 8
+    memory: "32G"
+    time: "8h"
+    
+  salmon_quant:
+    cpus: 4
+    memory: "16G"
+    time: "4h"
+    
+  gatk:
+    cpus: 2
+    memory: "16G"
+    time: "12h"
+
+# Environment configuration
+environment:
+  # Conda environments
+  conda:
+    base: "envs/conda/base.yml"
+    rnaseq: "envs/conda/rnaseq.yml"
+    genomics: "envs/conda/genomics.yml"
+    ml: "envs/conda/ml.yml"
+    
+  # Container images
+  containers:
+    docker: "containers/docker/Dockerfile.full"
+    singularity: "containers/singularity/full.def"
+    
+  # R environment
+  renv:
+    profile: "envs/renv/.Rprofile"
+    lockfile: "envs/renv/renv.lock"
+
+# Workflow management
+workflow:
+  # Nextflow settings
+  nextflow:
+    config: "workflows/nextflow/nextflow.config"
+    main: "workflows/nextflow/main.nf"
+    profile: "docker"  # Options: docker, singularity, conda, hpc, cloud
+    
+  # Snakemake settings
+  snakemake:
+    snakefile: "workflows/snakemake/Snakefile"
+    cores: 4
+    profile: "conda"
+    
+# Output settings
+output:
+  # Report generation
+  reports:
+    multiqc: true
+    custom: true
+    
+  # File formats
+  compression: "gzip"
+  
+  # Cleanup
+  keep_temp: false
+  keep_logs: true
+  
+# Logging configuration
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/pipeline.log"
+  
+# Debugging and development
+debug:
+  dry_run: false
+  verbose: false
+  keep_going: false
+  
+# External integrations
+integrations:
+  # Git repository
+  git:
+    enabled: true
+    remote: "https://github.com/bioinfo-project/analysis"
+    
+  # Cloud storage
+  cloud:
+    provider: null  # Options: aws, gcp, azure
+    bucket: null
+    
+  # HPC
+  hpc:
+    scheduler: null  # Options: slurm, pbs, sge
+    account: null
+    partition: null
+

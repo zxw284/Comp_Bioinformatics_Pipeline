@@ -1,0 +1,14 @@
+{
+  "_comment": "This is an empty renv.lock file. To initialize the R environment, run renv::init() from within R in this project directory.",
+  "R": {
+    "Version": "4.3.0",
+    "Repositories": [
+      {
+        "Name": "CRAN",
+        "URL": "https://cran.rstudio.com"
+      }
+    ]
+  },
+  "Packages": {}
+}
+

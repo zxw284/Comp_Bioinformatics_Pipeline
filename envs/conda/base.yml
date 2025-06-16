@@ -1,0 +1,48 @@
+name: bioinfo-base
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Core Python
+  - python=3.11
+  - pip
+  
+  # Essential data science
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - plotly
+  - jupyterlab
+  - notebook
+  
+  # Bioinformatics basics
+  - biopython
+  - pysam
+  - htseq
+  - pybedtools
+  
+  # Workflow tools
+  - snakemake
+  - nextflow
+  
+  # System tools
+  - curl
+  - wget
+  - git
+  - make
+  - cmake
+  
+  # File formats
+  - hdf5
+  - pytables
+  - h5py
+  
+  - pip:
+    - scanpy
+    - scvi-tools
+    - cellxgene
+    - papermill
+

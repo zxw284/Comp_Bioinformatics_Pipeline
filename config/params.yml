@@ -1,0 +1,381 @@
+# Parameter Configuration
+# Analysis-specific parameters for bioinformatics workflows
+
+# Global analysis parameters
+global:
+  # Random seed for reproducibility
+  seed: 42
+  
+  # Minimum quality scores
+  min_base_quality: 20
+  min_mapping_quality: 30
+  
+  # Threading
+  max_threads: 8
+  
+  # Memory limits
+  max_memory_gb: 32
+
+# Quality Control Parameters
+quality_control:
+  fastqc:
+    # FastQC-specific parameters
+    kmers: 7
+    quiet: false
+    extract: false
+    
+  # Quality thresholds
+  thresholds:
+    min_read_length: 50
+    max_n_content: 5  # percentage
+    min_gc_content: 40  # percentage
+    max_gc_content: 60  # percentage
+    min_phred_score: 20
+    
+  # Sequence complexity
+  complexity:
+    min_complexity: 0.3
+    dust_threshold: 7
+
+# Read Preprocessing Parameters
+preprocessing:
+  trimming:
+    # Trimmomatic parameters
+    trimmomatic:
+      leading: 3
+      trailing: 3
+      sliding_window: "4:15"
+      min_length: 36
+      
+    # Cutadapt parameters
+    cutadapt:
+      quality_cutoff: 20
+      minimum_length: 50
+      maximum_length: null
+      error_rate: 0.1
+      overlap: 3
+      
+  # Adapter sequences
+  adapters:
+    illumina_universal: "AGATCGGAAGAG"
+    nextera: "CTGTCTCTTATA"
+    truseq:
+      forward: "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
+      reverse: "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+      
+  # Contamination screening
+  contamination:
+    enabled: false
+    databases:
+      - "phiX"
+      - "human"
+      - "vector"
+
+# Alignment Parameters
+alignment:
+  # STAR parameters
+  star:
+    # Index parameters
+    genome_chr_bin_n_bits: 18
+    genome_sa_index_n_bases: 14
+    
+    # Alignment parameters
+    out_sam_type: "BAM SortedByCoordinate"
+    out_sam_unmapped: "Within"
+    out_sam_attributes: "Standard"
+    quant_mode: "GeneCounts"
+    
+    # Splice junction parameters
+    align_sj_overhang_min: 8
+    align_sj_db_overhang_min: 1
+    
+    # Filtering parameters
+    out_filter_mismatch_n_max: 999
+    out_filter_mismatch_n_over_read_l_max: 0.04
+    align_intron_min: 20
+    align_intron_max: 1000000
+    align_mates_gap_max: 1000000
+    
+  # BWA parameters
+  bwa:
+    algorithm: "mem"  # Options: mem, aln
+    
+    # BWA-MEM parameters
+    mem:
+      minimum_seed_length: 19
+      band_width: 100
+      off_diagonal_x_dropoff: 100
+      internal_seeds_ratio: 1.5
+      reseed_trigger: 1.5
+      
+  # Bowtie2 parameters
+  bowtie2:
+    # Sensitivity settings
+    preset: "sensitive"  # Options: very-fast, fast, sensitive, very-sensitive
+    
+    # Advanced parameters
+    n_ceil: "L,0,0.15"
+    dpad: 15
+    gbar: 4
+    
+  # HISAT2 parameters
+  hisat2:
+    # RNA-seq specific
+    rna_strandness: "unstranded"  # Options: unstranded, F, R
+    dta: true  # downstream transcriptome analysis
+    
+    # Splicing parameters
+    max_intronlen: 500000
+    min_intronlen: 20
+
+# Quantification Parameters
+quantification:
+  # Salmon parameters
+  salmon:
+    # Library type
+    library_type: "A"  # Automatic detection
+    
+    # Bias correction
+    gc_bias: true
+    pos_bias: false
+    
+    # Validation
+    validate_mappings: true
+    
+    # Bootstrapping
+    num_bootstraps: 100
+    
+    # Gibbs sampling
+    num_gibbs_samples: 0
+    
+  # Kallisto parameters
+  kallisto:
+    # Fragment length parameters (for single-end reads)
+    fragment_length: 200
+    fragment_sd: 20
+    
+    # Bootstrapping
+    bootstrap_samples: 100
+    
+    # Bias correction
+    bias: false
+    
+  # featureCounts parameters
+  featurecounts:
+    # Feature type and attribute
+    feature_type: "exon"
+    attribute_type: "gene_id"
+    
+    # Strand specificity
+    strand_specific: 0  # 0: unstranded, 1: stranded, 2: reverse-stranded
+    
+    # Multi-mapping reads
+    multi_mapping: false
+    
+    # Minimum mapping quality
+    min_mq: 10
+
+# Variant Calling Parameters
+variant_calling:
+  # GATK parameters
+  gatk:
+    # HaplotypeCaller
+    haplotype_caller:
+      emit_ref_confidence: "GVCF"
+      min_base_quality_score: 10
+      
+    # Variant filtering
+    variant_filtration:
+      filter_expression:
+        - "QD < 2.0"
+        - "FS > 60.0"
+        - "MQ < 40.0"
+        - "MQRankSum < -12.5"
+        - "ReadPosRankSum < -8.0"
+        
+  # FreeBayes parameters
+  freebayes:
+    # Population parameters
+    ploidy: 2
+    
+    # Quality thresholds
+    min_base_quality: 20
+    min_mapping_quality: 20
+    
+    # Allele frequency
+    min_alternate_fraction: 0.05
+    
+  # VarScan parameters
+  varscan:
+    # Calling thresholds
+    min_coverage: 8
+    min_reads2: 2
+    min_avg_qual: 15
+    min_var_freq: 0.01
+    p_value: 0.99
+
+# Differential Expression Parameters
+differential_expression:
+  # DESeq2 parameters
+  deseq2:
+    # Filtering
+    min_count_threshold: 10
+    min_total_count: 15
+    
+    # Statistical thresholds
+    alpha: 0.05
+    lfc_threshold: 0
+    
+    # Independent filtering
+    independent_filtering: true
+    
+  # edgeR parameters
+  edger:
+    # Filtering
+    min_cpm: 1
+    min_count: 10
+    
+    # Statistical thresholds
+    fdr: 0.05
+    logfc: 1
+    
+  # limma parameters
+  limma:
+    # Voom transformation
+    normalize_method: "TMM"
+    
+    # Statistical thresholds
+    p_value: 0.05
+    log_fold_change: 1
+
+# Single-cell Analysis Parameters
+single_cell:
+  # Scanpy parameters
+  scanpy:
+    # Quality control
+    min_genes: 200
+    min_cells: 3
+    max_genes: 5000
+    max_mito_percent: 20
+    
+    # Normalization
+    target_sum: 10000
+    
+    # Feature selection
+    n_top_genes: 2000
+    
+    # Dimensionality reduction
+    n_pcs: 50
+    n_neighbors: 10
+    
+    # Clustering
+    resolution: 0.5
+    
+  # Cell filtering
+  cell_filtering:
+    # Minimum thresholds
+    min_genes_per_cell: 200
+    min_cells_per_gene: 3
+    
+    # Maximum thresholds
+    max_genes_per_cell: 5000
+    max_mito_genes_percent: 20
+    max_ribo_genes_percent: 50
+    
+  # Gene filtering
+  gene_filtering:
+    # Expression thresholds
+    min_expression: 0.1
+    min_cells_expressed: 10
+    
+# Pathway Analysis Parameters
+pathway_analysis:
+  # Gene Set Enrichment Analysis
+  gsea:
+    # Statistical parameters
+    nperm: 1000
+    scoring_scheme: "weighted"
+    metric: "Signal2Noise"
+    
+  # Over-representation analysis
+  ora:
+    # Statistical thresholds
+    p_value_cutoff: 0.05
+    q_value_cutoff: 0.2
+    
+  # Databases
+  databases:
+    - "GO_Biological_Process"
+    - "GO_Molecular_Function"
+    - "GO_Cellular_Component"
+    - "KEGG_Pathway"
+    - "Reactome_Pathway"
+    - "WikiPathways"
+
+# Machine Learning Parameters
+machine_learning:
+  # General ML parameters
+  general:
+    test_size: 0.2
+    validation_size: 0.2
+    random_state: 42
+    cross_validation_folds: 5
+    
+  # Feature selection
+  feature_selection:
+    method: "variance_threshold"  # Options: variance_threshold, univariate, recursive
+    n_features: 1000
+    
+  # Dimensionality reduction
+  dimensionality_reduction:
+    method: "pca"  # Options: pca, tsne, umap
+    n_components: 50
+    
+  # Classification parameters
+  classification:
+    algorithms:
+      - "random_forest"
+      - "svm"
+      - "logistic_regression"
+      
+  # Hyperparameter optimization
+  hyperparameter_optimization:
+    method: "optuna"  # Options: optuna, hyperopt, sklearn
+    n_trials: 100
+    
+# Visualization Parameters
+visualization:
+  # Plot settings
+  plots:
+    dpi: 300
+    format: "png"  # Options: png, pdf, svg
+    color_palette: "Set1"
+    
+  # Figure dimensions
+  figure_size:
+    width: 10
+    height: 8
+    
+  # Heatmap parameters
+  heatmap:
+    clustering_method: "ward"
+    distance_metric: "euclidean"
+    color_map: "viridis"
+    
+# Statistical Parameters
+statistics:
+  # Multiple testing correction
+  multiple_testing:
+    method: "fdr_bh"  # Options: bonferroni, fdr_bh, fdr_by
+    
+  # Correlation analysis
+  correlation:
+    method: "pearson"  # Options: pearson, spearman, kendall
+    min_correlation: 0.5
+    
+  # Clustering
+  clustering:
+    method: "hierarchical"  # Options: hierarchical, kmeans, dbscan
+    distance_metric: "euclidean"
+    linkage: "ward"
+

@@ -1,0 +1,62 @@
+name: bioinfo-rnaseq
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Inherit from base
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - biopython
+  
+  # RNA-seq specific tools
+  - fastqc
+  - multiqc
+  - trimmomatic
+  - cutadapt
+  - fastp
+  
+  # Alignment
+  - star
+  - hisat2
+  - bowtie2
+  - samtools
+  - bamtools
+  
+  # Quantification
+  - salmon
+  - kallisto
+  - featurecounts
+  - htseq
+  
+  # Differential expression
+  - r-base=4.3
+  - r-deseq2
+  - r-edger
+  - r-limma
+  - r-tximport
+  - r-ggplot2
+  - r-pheatmap
+  - r-corrplot
+  
+  # Single-cell RNA-seq
+  - scanpy
+  - scvelo
+  - scrublet
+  
+  # Quality control
+  - picard
+  - rseqc
+  
+  - pip:
+    - scvi-tools
+    - cellxgene
+    - velocyto
+    - pyscenic
+    - harmonypy
+

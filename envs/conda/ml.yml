@@ -1,0 +1,77 @@
+name: bioinfo-ml
+channels:
+  - conda-forge
+  - bioconda
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  # Core Python & Data Science
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - plotly
+  - jupyterlab
+  
+  # Machine Learning Core
+  - scikit-learn
+  - xgboost
+  - lightgbm
+  - catboost
+  
+  # Deep Learning
+  - pytorch
+  - torchvision
+  - pytorch-cuda=11.8
+  - tensorflow
+  - keras
+  
+  # Bioinformatics ML
+  - scanpy
+  - anndata
+  - scvi-tools
+  - mudata
+  
+  # Feature engineering
+  - feature-engine
+  - category_encoders
+  - imbalanced-learn
+  
+  # Model interpretation
+  - shap
+  - lime
+  - eli5
+  
+  # Hyperparameter optimization
+  - optuna
+  - hyperopt
+  - scikit-optimize
+  
+  # GPU acceleration
+  - cudf
+  - cuml
+  - cugraph
+  - rapids
+  
+  # R packages for ML
+  - r-base=4.3
+  - r-caret
+  - r-randomforest
+  - r-e1071
+  - r-glmnet
+  
+  - pip:
+    - scvi-tools
+    - cellxgene
+    - harmonypy
+    - pyscenic
+    - palantir
+    - cellrank
+    - wandb
+    - mlflow
+    - dvc
+

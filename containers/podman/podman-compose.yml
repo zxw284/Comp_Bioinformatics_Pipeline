@@ -1,0 +1,82 @@
+# Podman Compose configuration for bioinformatics project
+# Note: This is a stub file. Podman-compose follows docker-compose format.
+# To use: podman-compose -f podman-compose.yml up
+
+version: '3.8'
+
+services:
+  bioinfo-analysis:
+    # Build from local Dockerfile or use pre-built image
+    # build:
+    #   context: ../docker
+    #   dockerfile: Dockerfile.full
+    image: bioinfo:latest
+    
+    container_name: bioinfo-main
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 8G
+        reservations:
+          memory: 2G
+    
+    # Volume mounts
+    volumes:
+      - ../../data:/workspace/data:ro
+      - ../../results:/workspace/results:rw
+      - ../../config:/workspace/config:ro
+      - ../../bin:/workspace/bin:ro
+    
+    # Environment variables
+    environment:
+      - PROJ_ROOT=/workspace
+      - OMP_NUM_THREADS=4
+      - NUMBA_NUM_THREADS=4
+    
+    # Working directory
+    working_dir: /workspace
+    
+    # Keep container running
+    command: tail -f /dev/null
+    
+    # Network
+    networks:
+      - bioinfo-net
+
+  # Optional: Jupyter service
+  jupyter:
+    image: bioinfo:latest
+    container_name: bioinfo-jupyter
+    
+    ports:
+      - "8888:8888"
+    
+    volumes:
+      - ../../:/workspace:rw
+    
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    
+    command: >
+      bash -c "jupyter lab 
+        --ip=0.0.0.0 
+        --port=8888 
+        --no-browser 
+        --allow-root 
+        --notebook-dir=/workspace"
+    
+    networks:
+      - bioinfo-net
+
+networks:
+  bioinfo-net:
+    driver: bridge
+
+# Optional: Named volumes for persistent data
+volumes:
+  bioinfo-cache:
+    driver: local
+

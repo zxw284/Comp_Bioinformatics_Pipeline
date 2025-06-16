@@ -1,0 +1,135 @@
+# Multi-stage bioinformatics container
+# Based on Ubuntu 22.04 with comprehensive tool suite
+
+FROM ubuntu:22.04 as base
+
+# Metadata
+LABEL maintainer="bioinfo-project"
+LABEL description="Comprehensive bioinformatics analysis container"
+LABEL version="1.0"
+
+# Environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH=/opt/conda/bin:$PATH
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    git \
+    build-essential \
+    cmake \
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libncurses5-dev \
+    libhdf5-dev \
+    libxml2-dev \
+    libfontconfig1-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    default-jdk \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Miniconda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    /opt/conda/bin/conda clean -tipsy && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+
+# Add conda channels
+RUN conda config --add channels bioconda && \
+    conda config --add channels conda-forge && \
+    conda config --set channel_priority strict
+
+# Stage 2: Install bioinformatics tools
+FROM base as biotools
+
+# Install core bioinformatics tools
+RUN conda install -y \
+    # Quality control
+    fastqc=0.12.1 \
+    multiqc=1.15 \
+    trimmomatic=0.39 \
+    cutadapt=4.4 \
+    fastp=0.23.4 \
+    # Alignment
+    bwa=0.7.17 \
+    star=2.7.10b \
+    hisat2=2.2.1 \
+    bowtie2=2.5.1 \
+    minimap2=2.24 \
+    # SAM/BAM processing
+    samtools=1.17 \
+    bcftools=1.17 \
+    htslib=1.17 \
+    picard=3.0.0 \
+    # Quantification
+    salmon=1.10.1 \
+    kallisto=0.48.0 \
+    featurecounts=2.0.6 \
+    # Variant calling
+    gatk4=4.4.0.0 \
+    freebayes=1.3.6 \
+    # Utilities
+    bedtools=2.31.0 \
+    vcftools=0.1.16 \
+    tabix=1.17 \
+    && conda clean -afy
+
+# Stage 3: Add Python/R data science stack
+FROM biotools as datascience
+
+# Install Python packages
+RUN conda install -y python=3.11 && \
+    pip install --no-cache-dir \
+    numpy==1.24.3 \
+    pandas==2.0.3 \
+    scipy==1.11.1 \
+    matplotlib==3.7.2 \
+    seaborn==0.12.2 \
+    plotly==5.15.0 \
+    jupyterlab==4.0.5 \
+    scanpy==1.9.4 \
+    scvi-tools==1.0.2 \
+    cellxgene==1.1.1 \
+    biopython==1.81 \
+    pysam==0.21.0 \
+    && conda clean -afy
+
+# Install R and packages
+RUN conda install -y r-base=4.3.1 && \
+    R -e "install.packages('BiocManager')" && \
+    R -e "BiocManager::install(c('DESeq2', 'edgeR', 'limma', 'ComplexHeatmap', 'clusterProfiler'))" && \
+    R -e "install.packages(c('tidyverse', 'Seurat', 'pheatmap', 'corrplot'))" \
+    && conda clean -afy
+
+# Stage 4: Final production image
+FROM datascience as final
+
+# Create working directories
+RUN mkdir -p /workspace /data /results
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy any local scripts or configs
+# COPY scripts/ /usr/local/bin/
+# COPY configs/ /opt/configs/
+
+# Set up entry point
+CMD ["/bin/bash"]
+

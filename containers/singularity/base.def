@@ -1,0 +1,61 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%labels
+    Author bioinfo-project
+    Description Base bioinformatics container with minimal tools
+    Version 1.0
+
+%help
+    This is a minimal bioinformatics base container with:
+    - Python 3.11 with basic data science libraries
+    - R 4.3 with essential packages
+    - Basic system tools for bioinformatics
+    
+    Usage:
+        singularity exec base.sif <command>
+        singularity shell base.sif
+
+%environment
+    export PATH=/opt/conda/bin:${PATH}
+    export LANG=C.UTF-8
+    export LC_ALL=C.UTF-8
+
+%post
+    # Update system
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update && apt-get install -y \
+        wget curl git build-essential \
+        zlib1g-dev libbz2-dev liblzma-dev \
+        libcurl4-openssl-dev libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+    
+    # Install Miniconda
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+    /bin/bash /tmp/miniconda.sh -b -p /opt/conda
+    rm /tmp/miniconda.sh
+    /opt/conda/bin/conda clean -tipsy
+    
+    # Configure conda
+    /opt/conda/bin/conda config --add channels bioconda
+    /opt/conda/bin/conda config --add channels conda-forge
+    
+    # Install minimal tools
+    /opt/conda/bin/conda install -y \
+        python=3.11 r-base=4.3.1 \
+        numpy pandas matplotlib biopython
+    
+    # Clean up
+    /opt/conda/bin/conda clean -afy
+    apt-get clean
+    
+    # Create directories
+    mkdir -p /workspace /data /results
+
+%runscript
+    exec /bin/bash "$@"
+
+%startscript
+    echo "Starting base bioinformatics container..."
+    exec /bin/bash
+

@@ -1,0 +1,76 @@
+name: bioinfo-genomics
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Core tools
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - biopython
+  
+  # Genome analysis
+  - bwa
+  - minimap2
+  - samtools
+  - bcftools
+  - htslib
+  - bedtools
+  - vcftools
+  - tabix
+  
+  # Variant calling
+  - gatk4
+  - freebayes
+  - varscan
+  - strelka
+  
+  # Assembly
+  - spades
+  - flye
+  - canu
+  - unicycler
+  
+  # Annotation
+  - prokka
+  - blast
+  - diamond
+  - interproscan
+  
+  # Quality control
+  - fastqc
+  - multiqc
+  - qualimap
+  - picard
+  
+  # Long-read sequencing
+  - ont-fast5-api
+  - nanopolish
+  - medaka
+  - guppy
+  
+  # Phylogenetics
+  - fasttree
+  - raxml
+  - iqtree
+  - muscle
+  - mafft
+  
+  # R packages
+  - r-base=4.3
+  - r-genomicalignments
+  - r-genomicranges
+  - r-biostrings
+  - r-variantannotation
+  
+  - pip:
+    - pysam
+    - pyvcf
+    - cyvcf2
+    - scikit-allel
+

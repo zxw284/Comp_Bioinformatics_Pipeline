@@ -1,0 +1,478 @@
+# Resource Configuration
+# Computational resource specifications for different environments
+
+# Global resource limits
+global_limits:
+  max_cpus: 64
+  max_memory: "256GB"
+  max_time: "7d"
+  max_disk: "10TB"
+
+# Environment-specific configurations
+environments:
+  # Local development environment
+  local:
+    max_cpus: 8
+    max_memory: "32GB"
+    max_time: "24h"
+    max_disk: "1TB"
+    
+    # Default process resources
+    default:
+      cpus: 1
+      memory: "4GB"
+      time: "2h"
+      disk: "10GB"
+      
+  # High Performance Computing cluster
+  hpc:
+    max_cpus: 128
+    max_memory: "512GB"
+    max_time: "7d"
+    max_disk: "100TB"
+    
+    # Queue/partition settings
+    partitions:
+      short:
+        max_time: "4h"
+        max_memory: "64GB"
+        max_cpus: 16
+      medium:
+        max_time: "24h"
+        max_memory: "128GB"
+        max_cpus: 32
+      long:
+        max_time: "7d"
+        max_memory: "256GB"
+        max_cpus: 64
+      highmem:
+        max_time: "24h"
+        max_memory: "1TB"
+        max_cpus: 32
+        
+    # Default process resources
+    default:
+      cpus: 2
+      memory: "8GB"
+      time: "4h"
+      disk: "50GB"
+      partition: "short"
+      
+  # Cloud computing environment
+  cloud:
+    max_cpus: 96
+    max_memory: "384GB"
+    max_time: "48h"
+    max_disk: "10TB"
+    
+    # Instance types (AWS)
+    instance_types:
+      small:
+        type: "t3.medium"
+        cpus: 2
+        memory: "4GB"
+        cost_per_hour: 0.0416
+      medium:
+        type: "c5.xlarge"
+        cpus: 4
+        memory: "8GB"
+        cost_per_hour: 0.17
+      large:
+        type: "c5.4xlarge"
+        cpus: 16
+        memory: "32GB"
+        cost_per_hour: 0.68
+      xlarge:
+        type: "c5.12xlarge"
+        cpus: 48
+        memory: "96GB"
+        cost_per_hour: 2.04
+      memory_optimized:
+        type: "r5.4xlarge"
+        cpus: 16
+        memory: "128GB"
+        cost_per_hour: 1.008
+        
+    # Spot instance settings
+    spot_instances:
+      enabled: true
+      max_price: 0.5  # per hour in USD
+      
+    # Default process resources
+    default:
+      cpus: 2
+      memory: "8GB"
+      time: "4h"
+      disk: "50GB"
+      instance_type: "medium"
+      spot: true
+
+# Process-specific resource requirements
+process_resources:
+  # Quality control processes
+  quality_control:
+    fastqc:
+      cpus: 2
+      memory: "4GB"
+      time: "1h"
+      disk: "10GB"
+      
+    multiqc:
+      cpus: 1
+      memory: "8GB"
+      time: "30m"
+      disk: "5GB"
+      
+    fastq_screen:
+      cpus: 4
+      memory: "8GB"
+      time: "2h"
+      disk: "20GB"
+      
+  # Read preprocessing
+  preprocessing:
+    trimmomatic:
+      cpus: 4
+      memory: "8GB"
+      time: "4h"
+      disk: "50GB"
+      
+    cutadapt:
+      cpus: 4
+      memory: "4GB"
+      time: "2h"
+      disk: "30GB"
+      
+    fastp:
+      cpus: 8
+      memory: "8GB"
+      time: "2h"
+      disk: "40GB"
+      
+  # Alignment processes
+  alignment:
+    star_index:
+      cpus: 16
+      memory: "64GB"
+      time: "4h"
+      disk: "100GB"
+      
+    star_align:
+      cpus: 16
+      memory: "64GB"
+      time: "8h"
+      disk: "200GB"
+      
+    bwa_index:
+      cpus: 8
+      memory: "16GB"
+      time: "2h"
+      disk: "50GB"
+      
+    bwa_mem:
+      cpus: 16
+      memory: "32GB"
+      time: "8h"
+      disk: "100GB"
+      
+    hisat2_index:
+      cpus: 8
+      memory: "16GB"
+      time: "2h"
+      disk: "50GB"
+      
+    hisat2_align:
+      cpus: 8
+      memory: "16GB"
+      time: "6h"
+      disk: "100GB"
+      
+    bowtie2_index:
+      cpus: 8
+      memory: "8GB"
+      time: "2h"
+      disk: "30GB"
+      
+    bowtie2_align:
+      cpus: 8
+      memory: "8GB"
+      time: "4h"
+      disk: "50GB"
+      
+  # Quantification processes
+  quantification:
+    salmon_index:
+      cpus: 8
+      memory: "16GB"
+      time: "2h"
+      disk: "30GB"
+      
+    salmon_quant:
+      cpus: 8
+      memory: "16GB"
+      time: "4h"
+      disk: "50GB"
+      
+    kallisto_index:
+      cpus: 4
+      memory: "8GB"
+      time: "1h"
+      disk: "20GB"
+      
+    kallisto_quant:
+      cpus: 4
+      memory: "8GB"
+      time: "2h"
+      disk: "30GB"
+      
+    featurecounts:
+      cpus: 4
+      memory: "8GB"
+      time: "2h"
+      disk: "20GB"
+      
+  # BAM/SAM processing
+  bam_processing:
+    samtools_sort:
+      cpus: 8
+      memory: "16GB"
+      time: "4h"
+      disk: "100GB"
+      
+    samtools_index:
+      cpus: 2
+      memory: "4GB"
+      time: "1h"
+      disk: "10GB"
+      
+    samtools_markdup:
+      cpus: 4
+      memory: "8GB"
+      time: "2h"
+      disk: "50GB"
+      
+    picard_markdup:
+      cpus: 4
+      memory: "16GB"
+      time: "4h"
+      disk: "100GB"
+      
+  # Variant calling
+  variant_calling:
+    gatk_haplotypecaller:
+      cpus: 4
+      memory: "32GB"
+      time: "12h"
+      disk: "100GB"
+      
+    gatk_genotypegvcfs:
+      cpus: 8
+      memory: "64GB"
+      time: "8h"
+      disk: "200GB"
+      
+    freebayes:
+      cpus: 8
+      memory: "16GB"
+      time: "8h"
+      disk: "100GB"
+      
+    varscan:
+      cpus: 4
+      memory: "8GB"
+      time: "4h"
+      disk: "50GB"
+      
+  # Assembly processes
+  assembly:
+    spades:
+      cpus: 32
+      memory: "128GB"
+      time: "24h"
+      disk: "500GB"
+      
+    flye:
+      cpus: 16
+      memory: "64GB"
+      time: "12h"
+      disk: "300GB"
+      
+    canu:
+      cpus: 32
+      memory: "128GB"
+      time: "48h"
+      disk: "1TB"
+      
+  # Annotation processes
+  annotation:
+    prokka:
+      cpus: 8
+      memory: "16GB"
+      time: "4h"
+      disk: "50GB"
+      
+    blast:
+      cpus: 16
+      memory: "32GB"
+      time: "8h"
+      disk: "100GB"
+      
+    diamond:
+      cpus: 16
+      memory: "32GB"
+      time: "4h"
+      disk: "50GB"
+      
+  # Single-cell analysis
+  single_cell:
+    cellranger_count:
+      cpus: 16
+      memory: "64GB"
+      time: "12h"
+      disk: "500GB"
+      
+    scanpy_analysis:
+      cpus: 8
+      memory: "32GB"
+      time: "4h"
+      disk: "100GB"
+      
+    seurat_analysis:
+      cpus: 8
+      memory: "32GB"
+      time: "4h"
+      disk: "100GB"
+      
+  # Machine learning
+  machine_learning:
+    training:
+      cpus: 16
+      memory: "64GB"
+      time: "24h"
+      disk: "200GB"
+      gpu: 1
+      
+    hyperparameter_tuning:
+      cpus: 32
+      memory: "128GB"
+      time: "48h"
+      disk: "500GB"
+      gpu: 2
+      
+# GPU resources
+gpu_resources:
+  # GPU types
+  gpu_types:
+    v100:
+      memory: "16GB"
+      compute_capability: "7.0"
+      cost_per_hour: 2.48
+      
+    a100:
+      memory: "40GB"
+      compute_capability: "8.0"
+      cost_per_hour: 4.1
+      
+    t4:
+      memory: "16GB"
+      compute_capability: "7.5"
+      cost_per_hour: 0.526
+      
+  # GPU-enabled processes
+  gpu_processes:
+    deep_learning:
+      gpu_count: 1
+      gpu_type: "v100"
+      cpus: 8
+      memory: "32GB"
+      
+    gpu_assembly:
+      gpu_count: 1
+      gpu_type: "a100"
+      cpus: 16
+      memory: "64GB"
+
+# Storage requirements
+storage:
+  # Temporary storage
+  temp:
+    min_free_space: "100GB"
+    cleanup_after: "7d"
+    
+  # Output storage
+  output:
+    compression: true
+    backup: true
+    retention_policy: "1y"
+    
+  # Cache storage
+  cache:
+    enabled: true
+    max_size: "500GB"
+    ttl: "30d"
+    
+# Network resources
+network:
+  # Bandwidth requirements
+  bandwidth:
+    min_download: "100Mbps"
+    min_upload: "50Mbps"
+    
+  # Data transfer
+  transfer:
+    max_concurrent: 10
+    retry_attempts: 3
+    timeout: "1h"
+    
+# Monitoring and alerts
+monitoring:
+  # Resource usage thresholds
+  thresholds:
+    cpu_usage: 90  # percentage
+    memory_usage: 90  # percentage
+    disk_usage: 85  # percentage
+    
+  # Alert settings
+  alerts:
+    enabled: true
+    email: "admin@bioinfo-project.org"
+    slack_webhook: null
+    
+# Cost optimization
+cost_optimization:
+  # Auto-scaling
+  auto_scaling:
+    enabled: true
+    min_instances: 1
+    max_instances: 10
+    scale_up_threshold: 80  # CPU percentage
+    scale_down_threshold: 20  # CPU percentage
+    
+  # Preemptible instances
+  preemptible:
+    enabled: true
+    max_preemption_rate: 0.8
+    
+  # Resource scheduling
+  scheduling:
+    off_peak_hours: "22:00-06:00"
+    weekend_scaling: 0.5
+    
+# Security and compliance
+security:
+  # Data encryption
+  encryption:
+    at_rest: true
+    in_transit: true
+    
+  # Access control
+  access_control:
+    rbac_enabled: true
+    audit_logging: true
+    
+  # Compliance
+  compliance:
+    gdpr: true
+    hipaa: false
+    sox: false
+
