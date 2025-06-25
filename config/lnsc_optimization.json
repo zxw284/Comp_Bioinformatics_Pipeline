@@ -1,0 +1,74 @@
+{
+  "data_path": "data/processed/lnsc_invivo_preprocessed.h5ad",
+  "output_dir": "results/lnsc_optimization",
+  "gpu_memory_gb": 16,
+  "device_id": 0,
+  "random_state": 42,
+  "markers": {
+    "tier1_markers": {
+      "FDC": ["Cr2", "Coch", "Fcgr2b"],
+      "MRC": ["Madcam1", "Tnfsf11"],
+      "Medullary": ["Inmt"],
+      "CD34_stromal": ["Cd34", "Pi16", "Cxcl14"],
+      "TRC_core": ["Ccl19", "Ccl21a", "Il7", "Pdpn"]
+    },
+    "gradient_markers": {
+      "TRC_subtypes": {
+        "Ccl19": {
+          "high": 2.5,
+          "low": [1.0, 2.5]
+        }
+      },
+      "Inflammatory": ["Cxcl9", "Cxcl10"],
+      "Activation": ["Nr4a1"]
+    },
+    "thresholds": {
+      "min_fold_change": 2.0,
+      "max_pvalue": 0.05,
+      "min_pct_expressing": 0.25
+    }
+  },
+  "optimization": {
+    "param_ranges": {
+      "n_pcs": {
+        "min": 10,
+        "max": 50
+      },
+      "n_neighbors": {
+        "min": 10,
+        "max": 50
+      },
+      "min_dist": {
+        "min": 0.01,
+        "max": 0.5
+      },
+      "resolution": {
+        "min": 0.1,
+        "max": 2.0
+      }
+    },
+    "score_weights": {
+      "tier1_specificity": 0.35,
+      "gradient_separation": 0.25,
+      "marker_coverage": 0.20,
+      "rare_population_score": 0.10,
+      "stability": 0.10
+    }
+  },
+  "validation_samples": [
+    "data/processed/lnsc_2d_invitro_preprocessed.h5ad",
+    "data/processed/lnsc_3d_invitro_preprocessed.h5ad"
+  ],
+  "optuna": {
+    "n_trials": 100,
+    "n_jobs": 1,
+    "pruner": {
+      "n_startup_trials": 10,
+      "n_warmup_steps": 5
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  }
+}
